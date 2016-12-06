@@ -36,7 +36,7 @@ def ImportFileSelectDialog():
 	if cmds.about(version=True)[:4] == "2012": # Support for newer versions
 		importFrom = cmds.fileDialog2(fileMode=1, fileFilter="SEAnim Files (*.seanim)", caption="Import SEAnim")
 	else:
-		importFrom = cmds.fileDialog2(fileMode=1, dialogStyle=1, fileFilter="SEAnim Files (*.seanim)", caption="Import SEAnim")
+		importFrom = cmds.fileDialog2(fileMode=1, dialogStyle=2, fileFilter="SEAnim Files (*.seanim)", caption="Import SEAnim")
 
 	if importFrom == None or len(importFrom) == 0 or importFrom[0].strip() == "":
 		return None
@@ -200,9 +200,22 @@ def LoadSEAnim(filepath=""):
 				# Convert to euler
 				euler_rot = quat.asEulerRotation();
 				# Set the matrix
-				cmds.setAttr(tag.name + ".r", math.degrees(euler_rot.x), math.degrees(euler_rot.y), math.degrees(euler_rot.z))
+				cmds.setAttr(tag.name + ".jointOrient", math.degrees(euler_rot.x), math.degrees(euler_rot.y), math.degrees(euler_rot.z))
 				# Key the frame
+				cmds.setKeyframe(tag.name, at="jointOrient", time=key.frame)
+				# Copy joint orient to rotation channels
+				joX = cmds.getAttr(tag.name + '.jointOrientX');
+				joY = cmds.getAttr(tag.name + '.jointOrientY');
+				joZ = cmds.getAttr(tag.name + '.jointOrientZ');
+				cmds.setAttr(tag.name + ".rotate", float(joX), float(joY), float(joZ));
+				# Key dat boi
 				cmds.setKeyframe(tag.name, at="rotate", time=key.frame)
+				# Reset joint orientation because 128 + 128 != 128
+				cmds.setAttr(tag.name + ".jo", 0, 0, 0)
+				cmds.setKeyframe(tag.name, at="jointOrient", time=0)
+			cmds.cutKey( tag.name, attribute="jointOrientX" );
+			cmds.cutKey( tag.name, attribute="jointOrientY" );
+			cmds.cutKey( tag.name, attribute="jointOrientZ" );
 			# Rotation interpolation (Only for eular angles)
 			mel.eval("rotationInterpolation -c quaternion " + tag.name + ".rotateX " + tag.name + ".rotateY " + tag.name + ".rotateZ")
 			# Linear interpolation (Eular angles)
