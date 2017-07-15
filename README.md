@@ -1,3 +1,5 @@
+# OUTDATED. REFER TO [THIS REPO](https://github.com/dtzxporter/SETools) FOR THE MOST UP-TO-DATE VERSION.
+
 # SEAToolsMaya
 A .SEA format import / export plugin for maya (2012+). This is a fork of DTZxPorter's plugin with several changes in an attempt to fix animation issues.
 
